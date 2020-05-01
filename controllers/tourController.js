@@ -104,23 +104,39 @@ exports.getTours = async (req, res) => {
     //   .where('difficulty')
     //   .equals('easy');
 
-    //faire une copie et enlever les excludedFields ils seront encore disponible dans req.query pour autre besoin ulterieure
+    // 1 - faire une copie et enlever les excludedFields ils seront encore disponible dans req.query pour autre besoin ulterieure
     let queryObj = { ...req.query };
     const excludedFields = ['page', 'limit', 'fields', 'sort'];
     excludedFields.map((field) => delete queryObj[field]);
 
-    //advanced filter pour les operators, on veut ajouter le $ pour gt gte lt lte ,et tous autres, prc dans les applications clientes on ecrit comme ça: /api*/v1/tours?duration[gte]=5&difficulty=easy, et ça sera convertit par express vers un objet comme ça sans $ : {duration: {gte:5}, difficulty: easy}, so il manque le $ , on va convertit l objet to string , et ajouter le $ ensuite parser
+    // 2 - advanced filter pour les operators, on veut ajouter le $ pour gt gte lt lte ,et tous autres, prc dans les applications clientes on ecrit comme ça: /api*/v1/tours?duration[gte]=5&difficulty=easy, et ça sera convertit par express vers un objet comme ça sans $ : {duration: {gte:5}, difficulty: easy}, so il manque le $ , on va convertit l objet to string , et ajouter le $ ensuite parser
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
     let query = TourModel.find(JSON.parse(queryStr));
 
-    // sorting by
+    // 3 -  sorting by
     if (req.query.sort) {
       const sortedBy = req.query.sort.split(',').join(' ');
       query = query.sort(sortedBy);
     } else {
       query = query.sort('-createdAt');
     }
+
+    // 4 - pagination and limit
+    const limit = req.query.limit * 1 || 5;
+    const page = req.query.page * 1 || 1;
+    //page 1, 1-5/ page 2, 6-10/ page 3; 11-15
+    const skip = (page -1) * limit;
+    if(skip >= await TourModel.countDocuments()){
+      //on test si on demande une page inexistant, 
+      //cad qu on va skiper tous les docs existant,
+      // cad skip sera >= le nombre du docs
+      throw new Error('page introuvable !'); 
+    }
+    query = query.skip(skip).limit(limit);
+
+
+
     const tours = await query;
     res.status(200).json({
       status: 'success',
