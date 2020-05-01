@@ -136,6 +136,19 @@ exports.getTours = async (req, res) => {
     query = query.skip(skip).limit(limit);
 
 
+    // select - project
+    if(req.query.fields){
+      //je peut recevoir fields like this = fields: "name,duration,-password" alors il faut le formater
+      // le signe moin (-) pour exclure ce champs, il ne sera pas retourne
+      //il exist aussi au niveau du schema mongoose une option pour exclure un champ
+      // qui s'appel select: false
+      const selectFields = req.query.fields.split(',').join(' ');
+      query = query.select(selectFields);
+    }else {
+      //on va exclure un champs de ne va pas retourne qui s'appel __v , ajoute automatiquement par mongoose
+      query = query.select('-__v');
+    }
+
 
     const tours = await query;
     res.status(200).json({
