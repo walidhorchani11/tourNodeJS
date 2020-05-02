@@ -1,19 +1,20 @@
 const fs = require('fs');
 const TourModel = require('../models/tourModel');
+const APIFeatures = require('../utils/apiFeatures');
 
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, 'utf8')
-);
+// const tours = JSON.parse(
+//   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, 'utf8')
+// );
 
-exports.checkID = (req, res, next, value) => {
-  if (value >= tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID walid',
-    });
-  }
-  next();
-};
+// exports.checkID = (req, res, next, value) => {
+//   if (value >= tours.length) {
+//     return res.status(404).json({
+//       status: 'fail',
+//       message: 'Invalid ID walid',
+//     });
+//   }
+//   next();
+// };
 
 exports.createTour = async (req, res) => {
   // const newId = tours[tours.length - 1].id + 1;
@@ -74,6 +75,14 @@ exports.createTour = async (req, res) => {
   // });
 };
 
+exports.aliaTopCheaps = async (req, res, next) => {
+  req.query.limit = '5'; //en string , car c'est ce qu on va avoir de la part
+  //d'une application cliente, et le next middleware le getTours va les manipuler
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,ratingsAverage,price,duration';
+  next();
+}
+
 exports.getTours = async (req, res) => {
   // const readable = fs.createReadStream(
   //   `${__dirname}/dev-data/data/tours-simple.json`,
@@ -104,53 +113,53 @@ exports.getTours = async (req, res) => {
     //   .where('difficulty')
     //   .equals('easy');
 
-    // 1 - faire une copie et enlever les excludedFields ils seront encore disponible dans req.query pour autre besoin ulterieure
-    let queryObj = { ...req.query };
-    const excludedFields = ['page', 'limit', 'fields', 'sort'];
-    excludedFields.map((field) => delete queryObj[field]);
+    // // 1 - faire une copie et enlever les excludedFields ils seront encore disponible dans req.query pour autre besoin ulterieure
+    // let queryObj = { ...req.query };
+    // const excludedFields = ['page', 'limit', 'fields', 'sort'];
+    // excludedFields.map((field) => delete queryObj[field]);
 
-    // 2 - advanced filter pour les operators, on veut ajouter le $ pour gt gte lt lte ,et tous autres, prc dans les applications clientes on ecrit comme ça: /api*/v1/tours?duration[gte]=5&difficulty=easy, et ça sera convertit par express vers un objet comme ça sans $ : {duration: {gte:5}, difficulty: easy}, so il manque le $ , on va convertit l objet to string , et ajouter le $ ensuite parser
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    let query = TourModel.find(JSON.parse(queryStr));
+    // // 2 - advanced filter pour les operators, on veut ajouter le $ pour gt gte lt lte ,et tous autres, prc dans les applications clientes on ecrit comme ça: /api*/v1/tours?duration[gte]=5&difficulty=easy, et ça sera convertit par express vers un objet comme ça sans $ : {duration: {gte:5}, difficulty: easy}, so il manque le $ , on va convertit l objet to string , et ajouter le $ ensuite parser
+    // let queryStr = JSON.stringify(queryObj);
+    // queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    // let query = TourModel.find(JSON.parse(queryStr));
 
-    // 3 -  sorting by
-    if (req.query.sort) {
-      const sortedBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortedBy);
-    } else {
-      query = query.sort('-createdAt');
-    }
+    // // 3 -  sorting by
+    // if (req.query.sort) {
+    //   const sortedBy = req.query.sort.split(',').join(' ');
+    //   query = query.sort(sortedBy);
+    // } else {
+    //   query = query.sort('-createdAt');
+    // }
 
-    // 4 - pagination and limit
-    const limit = req.query.limit * 1 || 5;
-    const page = req.query.page * 1 || 1;
-    //page 1, 1-5/ page 2, 6-10/ page 3; 11-15
-    const skip = (page -1) * limit;
-    if(skip >= await TourModel.countDocuments()){
-      //on test si on demande une page inexistant, 
-      //cad qu on va skiper tous les docs existant,
-      // cad skip sera >= le nombre du docs
-      throw new Error('page introuvable !'); 
-    }
-    query = query.skip(skip).limit(limit);
+    // // 4 - pagination and limit
+    // const limit = req.query.limit * 1 || 5;
+    // const page = req.query.page * 1 || 1;
+    // //page 1, 1-5/ page 2, 6-10/ page 3; 11-15
+    // const skip = (page -1) * limit;
+    
+    // query = query.skip(skip).limit(limit);
 
 
-    // select - project
-    if(req.query.fields){
-      //je peut recevoir fields like this = fields: "name,duration,-password" alors il faut le formater
-      // le signe moin (-) pour exclure ce champs, il ne sera pas retourne
-      //il exist aussi au niveau du schema mongoose une option pour exclure un champ
-      // qui s'appel select: false
-      const selectFields = req.query.fields.split(',').join(' ');
-      query = query.select(selectFields);
-    }else {
-      //on va exclure un champs de ne va pas retourne qui s'appel __v , ajoute automatiquement par mongoose
-      query = query.select('-__v');
-    }
+    // // select - project
+    // if(req.query.fields){
+    //   //je peut recevoir fields like this = fields: "name,duration,-password" alors il faut le formater
+    //   // le signe moin (-) pour exclure ce champs, il ne sera pas retourne
+    //   //il exist aussi au niveau du schema mongoose une option pour exclure un champ
+    //   // qui s'appel select: false
+    //   const selectFields = req.query.fields.split(',').join(' ');
+    //   query = query.select(selectFields);
+    // }else {
+    //   //on va exclure un champs de ne va pas retourne qui s'appel __v , ajoute automatiquement par mongoose
+    //   query = query.select('-__v');
+    // }
 
+    const features = new APIFeatures(req.query, TourModel.find())
+      .filter()
+      .sort()
+      .paginate()
+      .select();
 
-    const tours = await query;
+    const tours = await features.queryMongoose;
     res.status(200).json({
       status: 'success',
       results: tours.length,
