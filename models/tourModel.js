@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 // creation du schema
 const tourSchema = new mongoose.Schema({
@@ -7,6 +8,9 @@ const tourSchema = new mongoose.Schema({
     require: true,
     unique: true,
     trim: true,
+  },
+  slug: {
+    type: String,
   },
   price: {
     type: Number,
@@ -57,6 +61,17 @@ const tourSchema = new mongoose.Schema({
     type: Number,
   },
 });
+
+tourSchema.pre('save', function (next) {
+  // console.log(this);
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+// tourSchema.post('save', function (doc, next) {
+//   console.log(doc);
+// next();
+// });
 
 // creation du model autour de ce schema
 // Tour doit etre en majuscule
