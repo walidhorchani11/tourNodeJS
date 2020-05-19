@@ -1,6 +1,7 @@
 const fs = require('fs');
 const TourModel = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
+const catchAsync = require('../utils/catchAsync');
 
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, 'utf8')
@@ -81,7 +82,7 @@ exports.aliaTopCheaps = async (req, res, next) => {
   req.query.sort = '-ratingsAverage,price';
   req.query.fields = 'name,ratingsAverage,price,duration';
   next();
-}
+};
 
 exports.getTours = async (req, res) => {
   // const readable = fs.createReadStream(
@@ -199,20 +200,13 @@ exports.getTour = async (req, res) => {
   }
 };
 
-exports.deleteTour = async (req, res) => {
-  try {
-    await TourModel.findByIdAndDelete(req.params.id);
-    res.status(204).json({
-      status: 'success',
-      message: 'deleted with success',
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: 'error',
-      message: error,
-    });
-  }
-};
+exports.deleteTour = catchAsync(async (req, res, next) => {
+  await TourModel.findByIdAndDelete(req.params.id);
+  res.status(204).json({
+    status: 'success',
+    message: 'deleted with success',
+  });
+});
 
 exports.updateTour = async (req, res) => {
   try {
