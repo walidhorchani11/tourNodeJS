@@ -2,6 +2,7 @@
 const TourModel = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 exports.aliaTopCheaps = async (req, res, next) => {
   req.query.limit = '5'; //en string , car c'est ce qu on va avoir
@@ -25,7 +26,7 @@ exports.aliaTopCheaps = async (req, res, next) => {
 //   next();
 // };
 
-exports.createTour = catchAsync(async (req, res) => {
+exports.createTour = catchAsync(async (req, res, next) => {
   const newTour = await TourModel.create(req.body);
   res.status(201).json({
     status: 'success',
@@ -75,7 +76,7 @@ exports.createTour = catchAsync(async (req, res) => {
   // });
 });
 
-exports.getTours = catchAsync(async (req, res) => {
+exports.getTours = catchAsync(async (req, res, next) => {
   // const readable = fs.createReadStream(
   //   `${__dirname}/dev-data/data/tours-simple.json`,
   //   'utf-8'
@@ -120,7 +121,7 @@ exports.getTours = catchAsync(async (req, res) => {
   });
 });
 
-exports.getTour = catchAsync(async (req, res) => {
+exports.getTour = catchAsync(async (req, res, next) => {
   // puisque le req.params.id est de type string et l id de lobject est de type integer alors il faut changer le type du id du params
   // const id = req.params.id * 1;
   // const tour = tours.find((tour) => tour.id === id);
@@ -129,6 +130,9 @@ exports.getTour = catchAsync(async (req, res) => {
   // const tour = await TourModel.find({ _id: req.params.id });
   const tour = await TourModel.findById(req.params.id);
   // raccourci pour findById -- const tour = TourModel.findOne({ _id: req.params.id });
+  if (!tour) {
+    return next(new AppError('tour not found with that ID!', 404));
+  }
   res.status(200).json({
     status: 'success',
     data: {
@@ -145,12 +149,15 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.updateTour = catchAsync(async (req, res) => {
+exports.updateTour = catchAsync(async (req, res, next) => {
   //const tour = await TourModel.findById(req.params.id);
   const tour = await TourModel.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
+  if (!tour) {
+    return next(new AppError('tour not found with that ID!', 404));
+  }
   res.status(200).json({
     status: 'success',
     data: {
