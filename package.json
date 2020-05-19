@@ -8,7 +8,8 @@
     "start:prod": "SET NODE_ENV=production & nodemon server",
     "test": "jest --watchAll",
     "bdd:empty": "node ./dev-data/script/handleBdd --delete",
-    "bdd:import": "node ./dev-data/script/handleBdd --import"
+    "bdd:import": "node ./dev-data/script/handleBdd --import",
+    "debug": "ndb server"
   },
   "author": "walid horchani",
   "license": "ISC",
