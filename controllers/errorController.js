@@ -23,7 +23,6 @@ const sendErrorProd = (err, res) => {
       message: 'something went very wrong',
     });
   }
-
 };
 
 module.exports = (err, req, res, next) => {
