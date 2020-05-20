@@ -18,10 +18,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'please provide a password'],
     minlength: 8,
+    select: false,
   },
   passwordConfirm: {
     type: String,
     required: [true, 'please confirm your password'],
+    select: false,
+  },
+  photo: {
+    type: String,
   },
 });
 
