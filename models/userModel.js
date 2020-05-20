@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -35,6 +36,15 @@ const userSchema = new mongoose.Schema({
   photo: {
     type: String,
   },
+});
+
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  // si on va setter le champs password alors on passe au cryptage
+  this.password = await bcrypt.hash(this.password, 12);
+  // pas besoin d enrigistrer passwordConfirm au bdd
+  this.passwordConfirm = undefined;
+  next();
 });
 
 module.exports = mongoose.model('User', userSchema);
