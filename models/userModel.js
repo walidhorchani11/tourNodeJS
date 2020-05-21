@@ -47,4 +47,14 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+// nous avons creer cette methode ici car il est en liaison direct avec les data
+//this return to current document, but we need to pass userPassword because
+// field password is not selected (select=false)
+userSchema.methods.correctPassword = async function (
+  condidatePassword,
+  userPasword
+) {
+  return await bcrypt.compare(condidatePassword, userPasword);
+};
+
 module.exports = mongoose.model('User', userSchema);
