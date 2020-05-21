@@ -1,4 +1,4 @@
-const jsonwebtoken = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const User = require('../models/userModel.js');
 
 exports.signup = async (req, res, next) => {
@@ -12,14 +12,17 @@ exports.signup = async (req, res, next) => {
       passwordConfirm: req.body.passwordConfirm,
     });
     // after signup user, normalement il sera logger, so send JWT
-    jsonwebtoken.sign({ foo: 'bar' }, 'walidHorchani', (err, token) => {
-      res.status(201).json({
-        status: 'success',
-        data: {
-          user: newUser,
-          token,
-        },
-      });
+    // a verifier , il peut causer un probleme car il est synchrone
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    });
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        user: newUser,
+        token,
+      },
     });
   } catch (error) {
     next(error);
