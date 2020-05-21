@@ -2,7 +2,15 @@ const User = require('../models/userModel.js');
 
 exports.createUser = async (req, res, next) => {
   try {
-    const user = await User.create(req.body);
+    // on prend le necessaire from req.body,
+    // si on prend tous il peut contenir des donnees
+    // inattendus comme le role: admin par exp ou autre 
+    const user = await User.create({
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+      passwordConfirm: req.body.passwordConfirm,
+    });
     res.status(201).json({
       status: 'success',
       data: {
