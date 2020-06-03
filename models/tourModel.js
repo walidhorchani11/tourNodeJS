@@ -80,6 +80,47 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    //to specify geoSpacial data with mongo, we need to create new object,
+    //and specify at least 2 fields type & coordinates
+    // embeded object, in mongo il ya un type specifique -GeoJSON-
+    startLocation: {
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: {
+        type: [Number],
+      },
+      address: {
+        type: String,
+      },
+      description: {
+        type: String,
+      },
+    },
+    // specify array of object for locations, meme que startLocation
+    //onpeut definir startLocation comme location avec day = 0
+    // definir un array d obejct pour embeded doc
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: {
+          type: [Number],
+        },
+        address: {
+          type: String,
+        },
+        description: {
+          type: String,
+        },
+      },
+    ],
+    // RQ : on va faire imporation of data 
   },
   {
     // ce 2eme arg est un objet
