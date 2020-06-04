@@ -174,6 +174,11 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
+tourSchema.pre(/^find/, function (next) {
+  this.populate({ path: 'guides', select: '-__v' });
+  next();
+});
+
 //pour post on aura access au docs recus apres l execution du qyery
 tourSchema.post(/^find/, function (docs, next) {
   console.log('our docs are :::', docs);
