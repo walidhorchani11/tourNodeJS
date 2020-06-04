@@ -8,8 +8,8 @@ const app = require('./app');
 // console.log('string de cnx is :::', db);
 (async () => {
   try {
-    const db = process.env.DATABASE.replace('<PASSWORD>', process.env.PASSWORD);
-    await mongoose.connect(db, {
+    // const db = process.env.DATABASE.replace('<PASSWORD>', process.env.PASSWORD);
+    await mongoose.connect(process.env.DATABASE_LOCALE, {
       useCreateIndex: true,
       useNewUrlParser: true,
       useFindAndModify: false,
