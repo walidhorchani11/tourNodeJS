@@ -139,6 +139,15 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+//**** virtual populate */
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
+
+// *********
+
 tourSchema.virtual('durationWeeks').get(function () {
   // this cest le tourSchema,on a besoin et c'est pour ca
   //qu on a utilise regular function not arrow
