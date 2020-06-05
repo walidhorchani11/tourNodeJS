@@ -1,5 +1,6 @@
 const express = require('express');
 const toursController = require('../controllers/tourController');
+const reviewController = require('../controllers/reviewController');
 
 const router = express.Router();
 // router.param('id', toursController.checkID);
@@ -18,5 +19,13 @@ router
   .get(toursController.getTour)
   .delete(toursController.deleteTour)
   .patch(toursController.updateTour);
+
+// POST api/v1/tours/21541v8/reviews
+// GET api/v1/tours/21541v8/reviews
+// GET api/v1/tours/21541v8/reviews/514654fee
+router
+  .route('/:tourId/reviews')
+  .post(reviewController.createReview)
+  .get(reviewController.getReviews);
 
 module.exports = router;
