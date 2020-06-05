@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const tourRouter = require('./routes/tourRoutes.js');
 const userRouter = require('./routes/userRoutes.js');
+const reviewRouter = require('./routes/reviewRoutes');
 const AppError = require('./utils/appError');
 const errorHandler = require('./controllers/errorController');
 
@@ -16,6 +17,7 @@ app.use(express.static(`${__dirname}/public`));
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 //si la requete n est pas catcher par ces 2 anciens middleware tourRouter ou userRouter pour terminer et envoyer une response, alors il passe au middleware suivant avec all
 app.all('*', (req, res, next) => {
