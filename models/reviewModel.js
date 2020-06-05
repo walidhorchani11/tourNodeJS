@@ -32,4 +32,14 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+// query middleware
+reviewSchema.pre(/^find/, function (next) {
+  this.populate({ path: 'user', select: 'name photo' }).populate({
+    path: 'tour',
+    select: 'name',
+    //match: { price: { $gt: 397 } },
+  });
+  next();
+});
+
 module.exports = mongoose.model('Review', reviewSchema);
