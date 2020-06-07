@@ -1,4 +1,35 @@
+const multer = require('multer');
+const AppError = require('../utils/appError');
 const User = require('../models/userModel.js');
+
+//config multer storage
+const multerStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, `${__dirname}/../public/img/walid`);
+  },
+  filename: function (req, file, cb) {
+    const ext = file.mimetype.split('/')[1];
+    //user-userId-timestamp.ext
+    // user-51v51r5135-516516115131.jpeg
+    // injection du id pas encore faite
+    //cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+    // const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `user-${Date.now()}.${ext}`);
+  },
+});
+
+//config multer filter
+const multerFiler = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('not an image! please upoad image!', 400));
+  }
+};
+
+// const upload = multer({ storage: multerStorage, fileFilter: multerFiler });
+const upload = multer({ storage: multerStorage, fileFilter: multerFiler });
+exports.uploadUserPhoto = upload.single('photo');
 
 exports.createUser = async (req, res) => {
   try {
