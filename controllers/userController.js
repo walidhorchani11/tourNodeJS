@@ -102,6 +102,7 @@ exports.deleteUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
+    if (req.file) req.body.photo = req.file.filename;
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       runValidators: true,
       new: true,
